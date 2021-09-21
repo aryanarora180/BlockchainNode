@@ -15,10 +15,14 @@
     </option>
   </component>
   <component name="GOROOT" path="C:\Go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
   </component>
   <component name="ProjectId" id="1yRlCrMFZ99f4GN3ElsZXzKq4Zj" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -29,6 +33,11 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="last_opened_file_path" value="$USER_HOME$" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\aryan\go\src\BlockchianAssignment" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="go build BlockchianAssignment" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
@@ -59,21 +68,29 @@
       <screen x="0" y="0" width="1920" height="1032" />
     </state>
     <state x="414" y="171" width="1092" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1032@0.0.1920.1032" timestamp="1632222371998" />
-    <state width="1877" height="279" key="GridCell.Tab.0.bottom" timestamp="1632222335025">
+    <state x="805" y="414" key="Github.ShareDialog" timestamp="1632222445525">
       <screen x="0" y="0" width="1920" height="1032" />
     </state>
-    <state width="1877" height="279" key="GridCell.Tab.0.bottom/0.0.1920.1032@0.0.1920.1032" timestamp="1632222335025" />
-    <state width="1877" height="279" key="GridCell.Tab.0.center" timestamp="1632222335025">
+    <state x="805" y="414" key="Github.ShareDialog/0.0.1920.1032@0.0.1920.1032" timestamp="1632222445525" />
+    <state x="768" y="221" key="Github.UntrackedFilesDialog" timestamp="1632222456013">
       <screen x="0" y="0" width="1920" height="1032" />
     </state>
-    <state width="1877" height="279" key="GridCell.Tab.0.center/0.0.1920.1032@0.0.1920.1032" timestamp="1632222335025" />
-    <state width="1877" height="279" key="GridCell.Tab.0.left" timestamp="1632222335021">
+    <state x="768" y="221" key="Github.UntrackedFilesDialog/0.0.1920.1032@0.0.1920.1032" timestamp="1632222456013" />
+    <state width="1877" height="279" key="GridCell.Tab.0.bottom" timestamp="1632224178818">
       <screen x="0" y="0" width="1920" height="1032" />
     </state>
-    <state width="1877" height="279" key="GridCell.Tab.0.left/0.0.1920.1032@0.0.1920.1032" timestamp="1632222335021" />
-    <state width="1877" height="279" key="GridCell.Tab.0.right" timestamp="1632222335025">
+    <state width="1877" height="279" key="GridCell.Tab.0.bottom/0.0.1920.1032@0.0.1920.1032" timestamp="1632224178818" />
+    <state width="1877" height="279" key="GridCell.Tab.0.center" timestamp="1632224178818">
       <screen x="0" y="0" width="1920" height="1032" />
     </state>
-    <state width="1877" height="279" key="GridCell.Tab.0.right/0.0.1920.1032@0.0.1920.1032" timestamp="1632222335025" />
+    <state width="1877" height="279" key="GridCell.Tab.0.center/0.0.1920.1032@0.0.1920.1032" timestamp="1632224178818" />
+    <state width="1877" height="279" key="GridCell.Tab.0.left" timestamp="1632224178818">
+      <screen x="0" y="0" width="1920" height="1032" />
+    </state>
+    <state width="1877" height="279" key="GridCell.Tab.0.left/0.0.1920.1032@0.0.1920.1032" timestamp="1632224178818" />
+    <state width="1877" height="279" key="GridCell.Tab.0.right" timestamp="1632224178818">
+      <screen x="0" y="0" width="1920" height="1032" />
+    </state>
+    <state width="1877" height="279" key="GridCell.Tab.0.right/0.0.1920.1032@0.0.1920.1032" timestamp="1632224178818" />
   </component>
 </project>

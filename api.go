@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/handlers"
 	"io/ioutil"
 	"net/http"
 )
@@ -26,6 +27,10 @@ func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(jsonHeaderMiddleware)
 
+	header := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST"})
+	origins := handlers.AllowedOrigins([]string{"*"})
+
 	router.HandleFunc("/api/transactions/unverified", getUnverifiedTransactions)
 	router.HandleFunc("/api/transactions/verified", getVerifiedTransactions)
 	router.HandleFunc("/api/mine", mine)
@@ -36,7 +41,7 @@ func handleRequests() {
 	router.HandleFunc("/api/transactions/new", postNewTransaction).Methods("POST")
 	router.HandleFunc("/api/nodes/register", postRegisterNode).Methods("POST")
 
-	http.ListenAndServe(":5000", router)
+	http.ListenAndServe(":5000", handlers.CORS(header, methods, origins)(router))
 }
 
 func mine(w http.ResponseWriter, _ *http.Request) {
