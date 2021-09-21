@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/handlers"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 type ConsensusResponse struct {
@@ -23,7 +24,9 @@ type RegisterNodeResponse struct {
 	AllNodes []string `json:"all_nodes"`
 }
 
-func handleRequests() {
+func handleRequests(port int) {
+	addr := ":" + strconv.Itoa(port)
+
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(jsonHeaderMiddleware)
 
@@ -41,7 +44,11 @@ func handleRequests() {
 	router.HandleFunc("/api/transactions/new", postNewTransaction).Methods("POST")
 	router.HandleFunc("/api/nodes/register", postRegisterNode).Methods("POST")
 
-	http.ListenAndServe(":5000", handlers.CORS(header, methods, origins)(router))
+	fmt.Printf("Server attemping to listen on %v", addr)
+	err := http.ListenAndServe(addr, handlers.CORS(header, methods, origins)(router))
+	if err != nil {
+		fmt.Printf("An error occured while setting up server on %v", addr)
+	}
 }
 
 func mine(w http.ResponseWriter, _ *http.Request) {

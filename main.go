@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -34,8 +35,13 @@ var chain []Block
 var nodes []string
 
 func main() {
+	port, err := strconv.Atoi(os.Args[1])
+	if err != nil {
+		port = 5000
+	}
+
 	createNewBlock(100, "1")
-	handleRequests()
+	handleRequests(port)
 }
 
 func createNewBlock(proof int, previousHash string) Block {
