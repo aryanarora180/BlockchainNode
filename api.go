@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -24,6 +24,10 @@ type RegisterNodeResponse struct {
 	AllNodes []string `json:"all_nodes"`
 }
 
+/*
+   Different functionalities implemented in Blockchain context
+         :param port: port address
+*/
 func handleRequests(port int) {
 	addr := ":" + strconv.Itoa(port)
 
@@ -51,6 +55,9 @@ func handleRequests(port int) {
 	}
 }
 
+/*
+   Function to mine
+*/
 func mine(w http.ResponseWriter, _ *http.Request) {
 	lastBlock := chain[len(chain)-1]
 	proof := calculateProofOfWork(lastBlock)
@@ -66,14 +73,24 @@ func mine(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode(block)
 }
 
+/*
+   Get the current chain
+*/
 func getChain(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode(chain)
 }
 
+/*
+   Get the list of unverified transactions
+*/
 func getUnverifiedTransactions(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode(currentTransactions)
 }
 
+/*
+   Get the list of verified transactions
+		This is done by going over all the blocks in the chain and keeping track of all the transactions
+*/
 func getVerifiedTransactions(w http.ResponseWriter, _ *http.Request) {
 	var verifiedTransactions []Transaction
 	for _, block := range chain {
@@ -83,10 +100,17 @@ func getVerifiedTransactions(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode(verifiedTransactions)
 }
 
+/*
+   Get the list of all the registered nodes in the Blockchain network
+*/
 func getNodes(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode(nodes)
 }
 
+/*
+   Resolve conflicts using Longest chain rule as the consensus parameter:
+         Whether the chain is being replaced or not.
+*/
 func getConsensus(w http.ResponseWriter, _ *http.Request) {
 	replaced := resolveConflicts()
 
@@ -103,6 +127,9 @@ func getConsensus(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
+/*
+   Function to register a new transaction
+*/
 func postNewTransaction(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 
@@ -112,6 +139,7 @@ func postNewTransaction(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	//adding the transactions to out current transactions list, which will be added on the block on being mined
 	index := addNewTransaction(transaction)
 	err = json.NewEncoder(w).Encode(Message{Message: fmt.Sprintf("Transaction will be added to block %v", index)})
 	if err != nil {
@@ -119,6 +147,9 @@ func postNewTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
+   Function to register a node to the network
+*/
 func postRegisterNode(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 
