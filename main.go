@@ -197,13 +197,11 @@ func resolveConflicts() bool {
 		if err == nil && response.StatusCode == 200 {
 			responseBody, err := ioutil.ReadAll(response.Body)
 			if err == nil {
-				var conflictResolveResponse struct {
-					Chain  []Block `json:"chain"`
-				}
-				json.Unmarshal(responseBody, &conflictResolveResponse)
-				if len(conflictResolveResponse.Chain) > maxLength && isValidChain(conflictResolveResponse.Chain) {
-					maxLength = len(conflictResolveResponse.Chain)
-					newChain = conflictResolveResponse.Chain
+				var chain []Block
+				json.Unmarshal(responseBody, &chain)
+				if len(chain) > maxLength && isValidChain(chain) {
+					maxLength = len(chain)
+					newChain = chain
 				}
 			}
 		}
