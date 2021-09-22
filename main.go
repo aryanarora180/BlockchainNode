@@ -193,18 +193,17 @@ func resolveConflicts() bool {
 
 	// check the chains for all the nodes and replace the current chain with the longest chain (if it isn't already the longest)
 	for _, node := range nodes {
-		response, err := http.Get("http://" + node + "/chain")
+		response, err := http.Get("http://" + node + "/api/chain")
 		if err == nil && response.StatusCode == 200 {
 			responseBody, err := ioutil.ReadAll(response.Body)
 			if err == nil {
 				var conflictResolveResponse struct {
-					length int
-					chain  []Block
+					Chain  []Block `json:"chain"`
 				}
 				json.Unmarshal(responseBody, &conflictResolveResponse)
-				if conflictResolveResponse.length > maxLength && isValidChain(conflictResolveResponse.chain) {
-					maxLength = conflictResolveResponse.length
-					newChain = conflictResolveResponse.chain
+				if len(conflictResolveResponse.Chain) > maxLength && isValidChain(conflictResolveResponse.Chain) {
+					maxLength = len(conflictResolveResponse.Chain)
+					newChain = conflictResolveResponse.Chain
 				}
 			}
 		}
