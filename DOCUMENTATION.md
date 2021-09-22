@@ -25,14 +25,16 @@ Get a list of transactions that have not been mined (unverified) yet
 ```
 [
     {
-        "sender": "Rahul",
-        "recipient": "Akhil",
-        "amount": 1000
+        "sender": "Akhil",
+        "recipient": "Aryan",
+        "amount": 1,
+        "timestamp": "2021-09-22T22:13:11.8489877+05:30"
     },
     {
         "sender": "Aryan",
         "recipient": "Rahul",
-        "amount": 2000
+        "amount": 2,
+        "timestamp": "2021-09-22T22:13:20.5471972+05:30"
     }
 ]
 ```
@@ -73,31 +75,29 @@ Adds all unverified transactions to a new block, which verifies the transactions
 ```
 {
     "index": 1,
-    "timestamp": "2021-09-21T11:34:14.3950913+05:30",
+    "timestamp": "2021-09-22T22:13:45.5501624+05:30",
     "transactions": [
-        {
-            "sender": "Rahul",
-            "recipient": "Akhil",
-            "amount": 2100
-        },
         {
             "sender": "Akhil",
             "recipient": "Aryan",
-            "amount": 1100
+            "amount": 1,
+            "timestamp": "2021-09-22T22:13:11.8489877+05:30"
         },
         {
             "sender": "Aryan",
-            "recipient": "Akhil",
-            "amount": 2000
+            "recipient": "Rahul",
+            "amount": 2,
+            "timestamp": "2021-09-22T22:13:20.5471972+05:30"
         },
         {
             "sender": "0",
-            "recipient": "d168b64f829745358867c3dd5257d2fc",
-            "amount": 1
+            "recipient": "5e05a7e06b214cce9c516dd615817b60",
+            "amount": 1,
+            "timestamp": "2021-09-22T22:13:45.5501624+05:30"
         }
     ],
-    "proof": 18504,
-    "previous_hash": "4debf4626a20b7b2bb6f54496286017e2a957c4eea3af3139ec881b10ad38fda"
+    "proof": 101161,
+    "previous_hash": "c961c3aeb140ad3b42046b8e3faa1b16b542350550ce7017c7286defb424f7b8"
 }
 ``` 
 
@@ -117,38 +117,56 @@ Gets a list of all the blocks that have been mined on the network.
 [
     {
         "index": 0,
-        "timestamp": "2021-09-21T11:31:22.0185028+05:30",
+        "timestamp": "2021-09-22T22:13:06.3736145+05:30",
         "transactions": null,
         "proof": 100,
         "previous_hash": "1"
     },
     {
         "index": 1,
-        "timestamp": "2021-09-21T11:34:14.3950913+05:30",
+        "timestamp": "2021-09-22T22:13:45.5501624+05:30",
         "transactions": [
-            {
-                "sender": "Rahul",
-                "recipient": "Akhil",
-                "amount": 2100
-            },
             {
                 "sender": "Akhil",
                 "recipient": "Aryan",
-                "amount": 1100
+                "amount": 1,
+                "timestamp": "2021-09-22T22:13:11.8489877+05:30"
             },
             {
                 "sender": "Aryan",
-                "recipient": "Akhil",
-                "amount": 2000
+                "recipient": "Rahul",
+                "amount": 2,
+                "timestamp": "2021-09-22T22:13:20.5471972+05:30"
             },
             {
                 "sender": "0",
-                "recipient": "d168b64f829745358867c3dd5257d2fc",
-                "amount": 1
+                "recipient": "5e05a7e06b214cce9c516dd615817b60",
+                "amount": 1,
+                "timestamp": "2021-09-22T22:13:45.5501624+05:30"
             }
         ],
-        "proof": 18504,
-        "previous_hash": "4debf4626a20b7b2bb6f54496286017e2a957c4eea3af3139ec881b10ad38fda"
+        "proof": 101161,
+        "previous_hash": "c961c3aeb140ad3b42046b8e3faa1b16b542350550ce7017c7286defb424f7b8"
+    },
+    {
+        "index": 2,
+        "timestamp": "2021-09-22T22:14:16.836531+05:30",
+        "transactions": [
+            {
+                "sender": "Akhil",
+                "recipient": "Rahul",
+                "amount": 3,
+                "timestamp": "2021-09-22T22:14:08.9713217+05:30"
+            },
+            {
+                "sender": "0",
+                "recipient": "5e05a7e06b214cce9c516dd615817b60",
+                "amount": 1,
+                "timestamp": "2021-09-22T22:14:16.836531+05:30"
+            }
+        ],
+        "proof": 167273,
+        "previous_hash": "96fd6d60e979fc5f65e4531b2ee1fc5c1cad0288a6d599fb9297a4f370dd5181"
     }
 ]
 ``` 
@@ -168,39 +186,34 @@ Get a list of transactions from all the blocks that have been mined
 ```
 [
     {
-        "sender": "Aryan",
-        "recipient": "Rahul",
-        "amount": 2000
+        "sender": "Akhil",
+        "recipient": "Aryan",
+        "amount": 1,
+        "timestamp": "2021-09-22T22:13:11.8489877+05:30"
     },
     {
         "sender": "Aryan",
         "recipient": "Rahul",
-        "amount": 2000
+        "amount": 2,
+        "timestamp": "2021-09-22T22:13:20.5471972+05:30"
     },
     {
         "sender": "0",
-        "recipient": "ef4bd7dffe264867b5694c0a0936a95f",
-        "amount": 1
-    },
-    {
-        "sender": "Rahul",
-        "recipient": "Aryan",
-        "amount": 1000
-    },
-    {
-        "sender": "Rahul",
-        "recipient": "Aryan",
-        "amount": 1000
+        "recipient": "5e05a7e06b214cce9c516dd615817b60",
+        "amount": 1,
+        "timestamp": "2021-09-22T22:13:45.5501624+05:30"
     },
     {
         "sender": "Akhil",
-        "recipient": "Aryan",
-        "amount": 2000
+        "recipient": "Rahul",
+        "amount": 3,
+        "timestamp": "2021-09-22T22:14:08.9713217+05:30"
     },
     {
         "sender": "0",
-        "recipient": "ef4bd7dffe264867b5694c0a0936a95f",
-        "amount": 1
+        "recipient": "5e05a7e06b214cce9c516dd615817b60",
+        "amount": 1,
+        "timestamp": "2021-09-22T22:14:16.836531+05:30"
     }
 ]
 ```
@@ -270,28 +283,56 @@ Updates the node's chain
     "chain": [
         {
             "index": 0,
-            "timestamp": "2021-09-21T12:34:24.0753126+05:30",
+            "timestamp": "2021-09-22T22:13:06.3736145+05:30",
             "transactions": null,
             "proof": 100,
             "previous_hash": "1"
         },
         {
             "index": 1,
-            "timestamp": "2021-09-21T12:43:27.441507+05:30",
+            "timestamp": "2021-09-22T22:13:45.5501624+05:30",
             "transactions": [
                 {
+                    "sender": "Akhil",
+                    "recipient": "Aryan",
+                    "amount": 1,
+                    "timestamp": "2021-09-22T22:13:11.8489877+05:30"
+                },
+                {
                     "sender": "Aryan",
-                    "recipient": "Akhil",
-                    "amount": 2000
+                    "recipient": "Rahul",
+                    "amount": 2,
+                    "timestamp": "2021-09-22T22:13:20.5471972+05:30"
                 },
                 {
                     "sender": "0",
-                    "recipient": "dafd9c4b73ee42d19398490245c54b88",
-                    "amount": 1
+                    "recipient": "5e05a7e06b214cce9c516dd615817b60",
+                    "amount": 1,
+                    "timestamp": "2021-09-22T22:13:45.5501624+05:30"
                 }
             ],
-            "proof": 6786,
-            "previous_hash": "fa7f9a6c544a0bc316070a9578521e9638511608912ebd71c0caf80e315502d6"
+            "proof": 101161,
+            "previous_hash": "c961c3aeb140ad3b42046b8e3faa1b16b542350550ce7017c7286defb424f7b8"
+        },
+        {
+            "index": 2,
+            "timestamp": "2021-09-22T22:14:16.836531+05:30",
+            "transactions": [
+                {
+                    "sender": "Akhil",
+                    "recipient": "Rahul",
+                    "amount": 3,
+                    "timestamp": "2021-09-22T22:14:08.9713217+05:30"
+                },
+                {
+                    "sender": "0",
+                    "recipient": "5e05a7e06b214cce9c516dd615817b60",
+                    "amount": 1,
+                    "timestamp": "2021-09-22T22:14:16.836531+05:30"
+                }
+            ],
+            "proof": 167273,
+            "previous_hash": "96fd6d60e979fc5f65e4531b2ee1fc5c1cad0288a6d599fb9297a4f370dd5181"
         }
     ]
 }

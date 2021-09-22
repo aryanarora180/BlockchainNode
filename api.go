@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type ConsensusResponse struct {
@@ -65,6 +66,7 @@ func mine(w http.ResponseWriter, _ *http.Request) {
 		Sender:    "0",
 		Recipient: nodeIdentifier,
 		Amount:    1,
+		Timestamp: time.Now(),
 	})
 
 	previousHash := hash(lastBlock)
@@ -133,14 +135,23 @@ func getConsensus(w http.ResponseWriter, _ *http.Request) {
 func postNewTransaction(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 
-	var transaction Transaction
+	var transaction struct {
+		Sender    string `json:"sender"`
+		Recipient string `json:"recipient"`
+		Amount    int    `json:"amount"`
+	}
 	err := json.Unmarshal(body, &transaction)
 	if err != nil {
 		panic(err)
 	}
 
 	//adding the transactions to out current transactions list, which will be added on the block on being mined
-	index := addNewTransaction(transaction)
+	index := addNewTransaction(Transaction{
+		Sender:    transaction.Sender,
+		Recipient: transaction.Recipient,
+		Amount:    transaction.Amount,
+		Timestamp: time.Now(),
+	})
 	err = json.NewEncoder(w).Encode(Message{Message: fmt.Sprintf("Transaction will be added to block %v", index)})
 	if err != nil {
 		panic(err)

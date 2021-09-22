@@ -17,9 +17,10 @@ import (
 var nodeIdentifier = strings.Replace(uuid.New().String(), "-", "", -1)
 
 type Transaction struct {
-	Sender    string `json:"sender"`
-	Recipient string `json:"recipient"`
-	Amount    int    `json:"amount"`
+	Sender    string    `json:"sender"`
+	Recipient string    `json:"recipient"`
+	Amount    int       `json:"amount"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type Block struct {
