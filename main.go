@@ -141,13 +141,13 @@ func resolveConflicts() bool {
 			responseBody, err := ioutil.ReadAll(response.Body)
 			if err == nil {
 				var conflictResolveResponse struct {
-					length int
-					chain  []Block
+					Length int     `json:"length"`
+					Chain  []Block `json:"chain"`
 				}
 				json.Unmarshal(responseBody, &conflictResolveResponse)
-				if conflictResolveResponse.length > maxLength && isValidChain(conflictResolveResponse.chain) {
-					maxLength = conflictResolveResponse.length
-					newChain = conflictResolveResponse.chain
+				if conflictResolveResponse.Length > maxLength && isValidChain(conflictResolveResponse.Chain) {
+					maxLength = conflictResolveResponse.Length
+					newChain = conflictResolveResponse.Chain
 				}
 			}
 		}
