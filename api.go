@@ -1,6 +1,10 @@
 package main
 
 import (
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/handlers"
@@ -12,8 +16,8 @@ import (
 )
 
 type ConsensusResponse struct {
-	Message string  `json:"message"`
-	Chain   []Block `json:"chain"`
+	Message string        `json:"message"`
+	Chain   []SignedBlock `json:"chain"`
 }
 
 type Message struct {
@@ -21,8 +25,8 @@ type Message struct {
 }
 
 type RegisterNodeResponse struct {
-	Message  string   `json:"message"`
-	AllNodes []string `json:"all_nodes"`
+	Message  string `json:"message"`
+	AllNodes []Node `json:"all_nodes"`
 }
 
 /*
@@ -43,6 +47,7 @@ func handleRequests(port int) {
 	router.HandleFunc("/api/transactions/verified", getVerifiedTransactions)
 	router.HandleFunc("/api/mine", mine)
 	router.HandleFunc("/api/chain", getChain)
+	router.HandleFunc("/api/verify_chain", verifyCurrentChain)
 	router.HandleFunc("/api/nodes", getNodes)
 	router.HandleFunc("/api/nodes/resolve", getConsensus)
 
@@ -60,8 +65,15 @@ func handleRequests(port int) {
    Function to mine
 */
 func mine(w http.ResponseWriter, _ *http.Request) {
+	// TODO: Check if public key is in list of validators
+
 	lastBlock := chain[len(chain)-1]
-	proof := calculateProofOfWork(lastBlock)
+	if lastBlock.SignerPublicKey == getRsaPublicKeyAsBase64Str(publicKey) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(Message{Message: "Cannot mine block since you mined the last block"})
+		return
+	}
+
 	addNewTransaction(Transaction{
 		Sender:    "0",
 		Recipient: nodeIdentifier,
@@ -69,10 +81,32 @@ func mine(w http.ResponseWriter, _ *http.Request) {
 		Timestamp: time.Now(),
 	})
 
-	previousHash := hash(lastBlock)
-	block := createNewBlock(proof, previousHash)
+	previousHash := hash(lastBlock.Data)
 
-	json.NewEncoder(w).Encode(block)
+	block := createNewBlock(convertHashToString(previousHash), false)
+	blockHash := hash(block)
+
+	signature, err := rsa.SignPSS(rand.Reader, privateKey, crypto.SHA256, blockHash, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	err = rsa.VerifyPSS(&privateKey.PublicKey, crypto.SHA256, blockHash, signature, nil)
+	if err != nil {
+		fmt.Println("Could not verify signature: ", err)
+		return
+	}
+
+	newSignedBlock := SignedBlock{
+		Data:            block,
+		Signature:       base64.StdEncoding.EncodeToString(signature),
+		SignerPublicKey: getRsaPublicKeyAsBase64Str(publicKey),
+	}
+
+	currentTransactions = nil
+	chain = append(chain, newSignedBlock)
+
+	json.NewEncoder(w).Encode(newSignedBlock)
 }
 
 /*
@@ -96,7 +130,7 @@ func getUnverifiedTransactions(w http.ResponseWriter, _ *http.Request) {
 func getVerifiedTransactions(w http.ResponseWriter, _ *http.Request) {
 	var verifiedTransactions []Transaction
 	for _, block := range chain {
-		verifiedTransactions = append(verifiedTransactions, block.Transactions...)
+		verifiedTransactions = append(verifiedTransactions, block.Data.Transactions...)
 	}
 
 	json.NewEncoder(w).Encode(verifiedTransactions)
@@ -165,14 +199,26 @@ func postRegisterNode(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 
 	var newNode struct {
-		Node string `json:"node"`
+		Url         string `json:"url"`
+		PublicKey   string `json:"public_key"`
+		IsValidator int    `json:"is_validator"`
 	}
 	json.Unmarshal(body, &newNode)
-	registerNode(newNode.Node)
+	registerNode(newNode)
 
 	json.NewEncoder(w).Encode(RegisterNodeResponse{
 		Message:  "Node has been added to the network",
 		AllNodes: nodes,
+	})
+}
+
+func verifyCurrentChain(w http.ResponseWriter, _ *http.Request) {
+	valid := isValidChain(chain)
+
+	json.NewEncoder(w).Encode(struct {
+		Valid bool `json:"valid"`
+	}{
+		Valid: valid,
 	})
 }
 

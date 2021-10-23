@@ -1,9 +1,13 @@
 package main
 
 import (
+	"crypto"
+	"crypto/rsa"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 	"io/ioutil"
 	"net/http"
@@ -13,8 +17,6 @@ import (
 	"strings"
 	"time"
 )
-
-var nodeIdentifier = strings.Replace(uuid.New().String(), "-", "", -1)
 
 type Transaction struct {
 	Sender    string    `json:"sender"`
@@ -27,25 +29,42 @@ type Block struct {
 	Index        int           `json:"index"`
 	Timestamp    time.Time     `json:"timestamp"`
 	Transactions []Transaction `json:"transactions"`
-	Proof        int           `json:"proof"`
 	PreviousHash string        `json:"previous_hash"`
 }
 
+type SignedBlock struct {
+	Data            Block  `json:"data"`
+	Signature       string `json:"signature"`
+	SignerPublicKey string `json:"signer_public_key"`
+}
+
+type Node struct {
+	Url         string `json:"url"`
+	PublicKey   string `json:"public_key"`
+	IsValidator int    `json:"is_validator"`
+}
+
 var currentTransactions []Transaction
-var chain []Block
-var nodes []string
+var chain []SignedBlock
+var nodes []Node
+
+var nodeIdentifier = strings.Replace(uuid.New().String(), "-", "", -1)
+var privateKey *rsa.PrivateKey
+var publicKey *rsa.PublicKey
 
 /*
 Create the genesis Block in the Blockchain
-        As it is the first block, the previous hash is set to 1.
+        As it is the first block, the previous hash v is set to 1.
 */
 func main() {
+	privateKey, publicKey = getRsaKeyPair()
+
 	port, err := strconv.Atoi(os.Args[1])
 	if err != nil {
 		port = 5000
 	}
 
-	createNewBlock(100, "1")
+	createNewBlock("1", true)
 	handleRequests(port)
 }
 
@@ -55,22 +74,26 @@ Create a new Block in the Blockchain
         :param previousHash: hash of previous Block
         :return: Newly created Block
 */
-func createNewBlock(proof int, previousHash string) Block {
+func createNewBlock(previousHash string, addToChain bool) Block {
 	if previousHash == "" {
-		previousHash = hash(chain[len(chain)-1])
+		previousHash = convertHashToString(hash(chain[len(chain)-1].Data))
 	}
 
 	block := Block{
 		Index:        len(chain),
 		Timestamp:    time.Now(),
 		Transactions: currentTransactions,
-		Proof:        proof,
 		PreviousHash: previousHash,
 	}
 
-	// the current transaction list is reset after being added to the block
-	currentTransactions = nil
-	chain = append(chain, block)
+	if addToChain {
+		currentTransactions = nil
+		chain = append(chain, SignedBlock{
+			Data:            block,
+			Signature:       "",
+			SignerPublicKey: "",
+		})
+	}
 
 	return block
 }
@@ -80,7 +103,7 @@ func createNewBlock(proof int, previousHash string) Block {
        :param chain: A blockchain
        :return: True if valid, False if not
 */
-func isValidChain(chain []Block) bool {
+func isValidChain(chain []SignedBlock) bool {
 	lastBlock := chain[0]
 	currentIndex := 1
 
@@ -88,13 +111,22 @@ func isValidChain(chain []Block) bool {
 		block := chain[currentIndex]
 
 		// verifying hash of the Block
-		lastBlockHash := hash(lastBlock)
-		if block.PreviousHash != lastBlockHash {
+		lastBlockHash := hash(lastBlock.Data)
+		if block.Data.PreviousHash != convertHashToString(lastBlockHash) {
 			return false
 		}
 
-		// validating the proof of work
-		if !isValidProof(lastBlock.Proof, block.Proof, lastBlockHash) {
+		if lastBlock.SignerPublicKey == block.SignerPublicKey {
+			return false
+		}
+
+		signature, err := base64.StdEncoding.DecodeString(block.Signature)
+		signerPubKeyString, err := base64.StdEncoding.DecodeString(block.SignerPublicKey)
+		signerPubKey, err := parseRsaPublicKeyFromPemStr(string(signerPubKeyString))
+
+		err = rsa.VerifyPSS(signerPubKey, crypto.SHA256, hash(block.Data), signature, nil)
+		if err != nil {
+			fmt.Println("Could not verify signature: ", err)
 			return false
 		}
 
@@ -112,74 +144,53 @@ func isValidChain(chain []Block) bool {
 */
 func addNewTransaction(transaction Transaction) int {
 	currentTransactions = append(currentTransactions, transaction)
-	return chain[len(chain)-1].Index + 1
-}
-
-/*
-   Check if the proof is valid
-       :param lastProof: Previous proof
-       :param proof: Current proof
-       :param lastHash: The hash of the Previous Block
-       :return: True if valid, False if not.
-*/
-func isValidProof(lastProof int, currentProof int, lastHash string) bool {
-	guess := strconv.Itoa(lastProof) + strconv.Itoa(currentProof) + lastHash
-	guessHash := sha256.Sum256([]byte(guess))
-
-	// checking if the hash has 4 leading zeroes.
-	return hex.EncodeToString(guessHash[:])[:4] == "0000"
+	return chain[len(chain)-1].Data.Index + 1
 }
 
 /*
    Creates the hash of a Block (using SHA-256)
        :param block: Block
 */
-func hash(block Block) string {
+func hash(block Block) []byte {
 	blockString, err := json.Marshal(block)
 	if err != nil {
 		panic(err)
 	}
 	hash := sha256.Sum256(blockString)
-	return hex.EncodeToString(hash[:])
+	return hash[:]
 }
 
-/*
-   Proof of Work Algorithm implemented is:
-        - Find a number p' such that hash(pp') contains leading 4 zeroes
-        - Where p is the previous proof, and p' is the new proof
-
-       :param lastBlock: last Block
-       :return: the proof value [ p' ]
-*/
-func calculateProofOfWork(lastBlock Block) int {
-	lastProof := lastBlock.Proof
-	lastHash := hash(lastBlock)
-
-	proof := 0
-	for !isValidProof(lastProof, proof, lastHash) {
-		proof++
-	}
-
-	return proof
+func convertHashToString(hash []byte) string {
+	return hex.EncodeToString(hash)
 }
 
 /*
    Registering a Node:
        :param address: address of the Node
 */
-func registerNode(address string) {
-	parsedUrl, err := url.Parse(address)
+func registerNode(node Node) {
+	parsedUrl, err := url.Parse(node.Url)
 	if err != nil {
 		panic(err)
 	}
 
+	var path string
 	if parsedUrl.Host != "" {
-		nodes = append(nodes, parsedUrl.Host)
+		path = parsedUrl.Host
 	} else if parsedUrl.Path != "" {
-		nodes = append(nodes, parsedUrl.Path)
+		path = parsedUrl.Path
 	} else {
-		panic("Invalid URL")
+		path = ""
 	}
+
+	// TODO: If validator, only then you can add someone else as a validator else just add them as a Node
+	var isValidator = node.IsValidator
+
+	nodes = append(nodes, Node{
+		Url:         path,
+		PublicKey:   node.PublicKey,
+		IsValidator: isValidator,
+	})
 }
 
 /*
@@ -187,18 +198,18 @@ func registerNode(address string) {
        :return: true if the chain is being replaced, false if not.
 */
 func resolveConflicts() bool {
-	var newChain []Block
+	var newChain []SignedBlock
 
 	// interested in the longest chain, which we will find.
 	maxLength := len(chain)
 
 	// check the chains for all the nodes and replace the current chain with the longest chain (if it isn't already the longest)
 	for _, node := range nodes {
-		response, err := http.Get("http://" + node + "/api/chain")
+		response, err := http.Get("http://" + node.Url + "/api/chain")
 		if err == nil && response.StatusCode == 200 {
 			responseBody, err := ioutil.ReadAll(response.Body)
 			if err == nil {
-				var chain []Block
+				var chain []SignedBlock
 				json.Unmarshal(responseBody, &chain)
 				if len(chain) > maxLength && isValidChain(chain) {
 					maxLength = len(chain)
