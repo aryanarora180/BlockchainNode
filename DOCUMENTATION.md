@@ -5,12 +5,13 @@
 - **BASE_URL:** The hostname like http://localhost:5000
 - **API_PATH:** BASE_URL/api
 
-- GET: Used to get some data from the server. 
+- GET: Used to get some data from the server.
 - POST: To send any data to the server.
 
 ## Endpoints
 
 ### Get unverified transactions
+
 Get a list of transactions that have not been mined (unverified) yet
 
 **Endpoint:** API_PATH/transactions/unverified
@@ -20,8 +21,10 @@ Get a list of transactions that have not been mined (unverified) yet
 **Parameters:** None
 
 **Response:**
+
 - Status: 200
 - Body: A list of transactions. If no unverified transactions exist, it returns null.
+
 ```
 [
   {
@@ -40,20 +43,25 @@ Get a list of transactions that have not been mined (unverified) yet
 ```
 
 ### Add new transaction
-Adds a transaction to the list of unverified transactions, which when mined get added to a new block and become verified.
+
+Adds a transaction to the list of unverified transactions, which when mined get added to a new block and become
+verified.
 
 **Endpoint:** API_PATH/transactions/new
 
 **Method:** POST
 
 **Parameters:**
+
 - "sender": string, the name of the sender
 - "recipient": string, the name of the recipient
 - "amount": integer, the amount of coins the sender is sending to the recipient
 
 **Response:**
+
 - Status: 200
 - Body: A message denoting the index of the block the transaction will be added to once mined.
+
 ```
 {
     "message": "Transaction will be added to block 1"
@@ -61,8 +69,9 @@ Adds a transaction to the list of unverified transactions, which when mined get 
 ``` 
 
 ### Mine
-Adds all unverified transactions to a new block, which verifies the transactions.
-You can only mine if:
+
+Adds all unverified transactions to a new block, which verifies the transactions. You can only mine if:
+
 - Your node is a validator
 - You haven't mined the last block.
 
@@ -73,8 +82,10 @@ You can only mine if:
 **Parameters:** None
 
 **Response if allowed to mine:**
+
 - Status: 200
 - Body: The new block that's been mined.
+
 ```
 {
   "data": {
@@ -108,8 +119,10 @@ You can only mine if:
 ``` 
 
 **Response if not allowed to mine:**
+
 - Status: 400
 - Body: A message denoting why you're not allowed to mine.
+
 ``` 
 {
   "message": "Cannot mine block since you mined the last block"
@@ -117,6 +130,7 @@ You can only mine if:
 ```  
 
 ### Chain
+
 Gets a list of all the blocks that have been mined on the network.
 
 **Endpoint:** API_PATH/chain
@@ -126,8 +140,10 @@ Gets a list of all the blocks that have been mined on the network.
 **Parameters:** None
 
 **Response:**
+
 - Status: 200
 - Body: The list of all blocks.
+
 ```
 [
   {
@@ -173,10 +189,12 @@ Gets a list of all the blocks that have been mined on the network.
 ``` 
 
 ### Verify chain
-Goes over all the blocks in the chain and checks whether the chain is valid.
-Criteria for a chain to be valid:
+
+Goes over all the blocks in the chain and checks whether the chain is valid. Criteria for a chain to be valid:
+
 - The block's previous hash should actually equal the previous block's data's hash.
 - The block's signer shouldn't have signed the previous block.
+- The signer is a validator
 - The RSA signature can be verified.
 
 **Endpoint:** API_PATH/verify_chain
@@ -186,8 +204,10 @@ Criteria for a chain to be valid:
 **Parameters:** None
 
 **Response:**
+
 - Status: 200
 - Body: A true/false value denoting whether the chain is valid or not.
+
 ``` 
 {
   "valid": true
@@ -195,6 +215,7 @@ Criteria for a chain to be valid:
 ``` 
 
 ### Get verified transactions
+
 Get a list of transactions from all the blocks that have been mined
 
 **Endpoint:** API_PATH/transactions/verified
@@ -204,8 +225,10 @@ Get a list of transactions from all the blocks that have been mined
 **Parameters:** None
 
 **Response:**
+
 - Status: 200
 - Body: A list of transactions.
+
 ```
 [
   {
@@ -230,6 +253,7 @@ Get a list of transactions from all the blocks that have been mined
 ```
 
 ### Get nodes
+
 Gets a list of all nodes registered on the network.
 
 **Endpoint:** API_PATH/nodes
@@ -239,41 +263,57 @@ Gets a list of all nodes registered on the network.
 **Parameters:** None
 
 **Response:**
+
 - Status: 200
-- Body: A list of all the hostnames of the nodes
+- Body: A list of all the hostnames, public keys, and whether the nodes are validators
+
 ```
 [
-    "localhost:5001",
-    "localhost:5002",
-    "localhost:5003"
+  {
+    "url": "localhost:5000",
+    "public_key": "LS0tLS1CRUdJTiBSU0EgUFVCTElDIEtFWS0tLS0tCk1JSUNJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBZzhBTUlJQ0NnS0NBZ0VBdHpHcDRTUEh5Q0k5TUtBWU9TdmsKR0trVlRjbVJVYnFpZ0x0QVZ1Vm9KcDRvOFU3Z1h6Z21RNitNb1RWTy9VN2Y4dENQeHp4MEUrWWlxZWlVOE1wTgpuc2wxS0lHYi9ndUdrK2ExMDhKNzgxK3B6aEt1ekY0RlBRcXYvNmM3WFI3N1l2NUN6YTJkUTRONHlxT3p3TjZKCkNtSjRPNU9hVEowcFIzeTBUd0dHTjlQdmdHVFF0WnFjZnFoL2NKMDNBMVU3VlBuQTlMdDFkQnpydnFIZ3BjSzEKU1Q1TldodW1HR2lBNnFWakQ3QlpHQmJTaXdaSW1mVmRiUVRFRUJsa09BZ1BUcDViak0xUWpMK0FmVjlKd1BVVApsNkYvQVVrNEFKVmlyRjlMZS9FSmpzdzJtcmNDN0swNmtLaXN4ZWp1MURSaElML1RYaXJzNTRnUWI3dGQ5c2xMClkyalhOWEVnU1RPVWs2K04zejk3cVJqMHRBS1RlbWJGb2dPUHlISWVPdktYQ3FuYkJ0VTRpSVNpU2lzeGdnQWYKV1NzWGFGZ210SHVBcEpicVl5RFZLVG9BSmF4Zklvbm8vd21yNUJOT1dBK29jcHRyV0xlTmVWQnpMVzJsMlFRUgpXTjR2NVQ0WnF6bjdLQ2FJdU4vWG9iV3M3NUp1UHd2bFFsUUR6Z1BjUnp6UTRVbFlmKzdiTCtHamdRSFFXL1R3CjlmUlJ6M2dHV3VqeDdvcWYyRk56UysydnhtSmxGZ1dFdVh4ekNqeU1SMWl2cjFlbVQ3akZudVRiYzQrZ0NMSkUKUXhqQUl3b0YrRXlwK2dSOFdQQW1ScmVOcU9kSXlSdEF3TkhYRDJJVTc4NHJxZTBkQktoUFVvcDFYYW1OWitvQgpocWNvanAxWlB5ZS9oTXJkUWpPNzJwMENBd0VBQVE9PQotLS0tLUVORCBSU0EgUFVCTElDIEtFWS0tLS0tCg==",
+    "is_validator": 0
+  }
 ]
-``` 
+```
 
-### Register a new node
-Register a new node onto the network. To get the new node's blocks upto date, you need to send another request to resolve conflicts.
+### Make a node a validator
 
-**Endpoint:** API_PATH/nodes/register
+If you are a validator, you can make another node a validator by providing its public key
+
+**Endpoint:** API_PATH/nodes/validatorify
 
 **Method:** POST
 
-**Parameters:** 
-- "node": The full URL of the node that needs to be registered onto the network. Eg: "http://localhost:5001"
+**Parameters:**
 
-**Response:**
+- "public_key": string, the public key of the node to make a validator
+- "url": string, the hostname of the node to make a validator (gets overridden)
+
+**Response if you are a validator:**
+
 - Status: 200
-- Body: A list of all the hostnames of the nodes
+- Body: A message stating that it was a success
+
 ```
 {
-    "message": "Node has been added to the network",
-    "all_nodes": [
-        "localhost:5001",
-        "localhost:5002",
-        "localhost:5003"
-    ]
+  "message": "Made LS0tLS1CR a validator"
 }
-``` 
+```
+
+**Response if you are not a validator:**
+
+- Status: 400
+- Body: A message stating that you aren't a validator
+
+```
+{
+  "message": "Non-validators cannot make a node a validator"
+}
+```
 
 ### Resolve conflicts
+
 Updates the node's chain
 **Endpoint:** API_PATH/nodes/resolve
 
@@ -282,70 +322,58 @@ Updates the node's chain
 **Parameters:** None
 
 **Response:**
+
 - Status: 200
-- Body: 
+- Body:
     - "message":
         - "Replaced": Your node was outdated, and the chain has been updated
         - "Authoritative":  Your node was up to date, and there was no need to update the node
     - "chain": The new, up to date chain
+
 ```
 {
     "message": "Authoritative",
     "chain": [
+  {
+    "data": {
+      "index": 0,
+      "timestamp": "2021-10-25T22:19:25.8935282+05:30",
+      "transactions": null,
+      "previous_hash": "1"
+    },
+    "signature": "",
+    "signer_public_key": ""
+  },
+  {
+    "data": {
+      "index": 1,
+      "timestamp": "2021-10-25T22:22:07.6165722+05:30",
+      "transactions": [
         {
-            "index": 0,
-            "timestamp": "2021-09-22T22:13:06.3736145+05:30",
-            "transactions": null,
-            "proof": 100,
-            "previous_hash": "1"
+          "sender": "Aryan",
+          "recipient": "Akhil",
+          "amount": 1,
+          "timestamp": "2021-10-25T22:21:46.683675+05:30"
         },
         {
-            "index": 1,
-            "timestamp": "2021-09-22T22:13:45.5501624+05:30",
-            "transactions": [
-                {
-                    "sender": "Akhil",
-                    "recipient": "Aryan",
-                    "amount": 1,
-                    "timestamp": "2021-09-22T22:13:11.8489877+05:30"
-                },
-                {
-                    "sender": "Aryan",
-                    "recipient": "Rahul",
-                    "amount": 2,
-                    "timestamp": "2021-09-22T22:13:20.5471972+05:30"
-                },
-                {
-                    "sender": "0",
-                    "recipient": "5e05a7e06b214cce9c516dd615817b60",
-                    "amount": 1,
-                    "timestamp": "2021-09-22T22:13:45.5501624+05:30"
-                }
-            ],
-            "proof": 101161,
-            "previous_hash": "c961c3aeb140ad3b42046b8e3faa1b16b542350550ce7017c7286defb424f7b8"
+          "sender": "Akhil",
+          "recipient": "Aryan",
+          "amount": 2,
+          "timestamp": "2021-10-25T22:21:53.1234764+05:30"
         },
         {
-            "index": 2,
-            "timestamp": "2021-09-22T22:14:16.836531+05:30",
-            "transactions": [
-                {
-                    "sender": "Akhil",
-                    "recipient": "Rahul",
-                    "amount": 3,
-                    "timestamp": "2021-09-22T22:14:08.9713217+05:30"
-                },
-                {
-                    "sender": "0",
-                    "recipient": "5e05a7e06b214cce9c516dd615817b60",
-                    "amount": 1,
-                    "timestamp": "2021-09-22T22:14:16.836531+05:30"
-                }
-            ],
-            "proof": 167273,
-            "previous_hash": "96fd6d60e979fc5f65e4531b2ee1fc5c1cad0288a6d599fb9297a4f370dd5181"
+          "sender": "0",
+          "recipient": "71a07a8b33b54fa287983a07b581551d",
+          "amount": 1,
+          "timestamp": "2021-10-25T22:22:07.6165722+05:30"
         }
-    ]
+      ],
+      "previous_hash": "73433e48c52a29cedc62a62d1832c07ce5c4c06db10c1d66f3824b4f609848ed"
+    },
+    "signature": "OueOC7IArpwMHsnWrC4xtowB03+QgFNPLmccijQ5vdHHdUHSTvg8pZNHNc9BWVGhnOB/9v8VBQtEE4AzsrKf0GpohRMeFJbhIshAAMBFfDhhsea0VHyCeJeFIb1bwqeJr2C4MpsAp5zhAm9ASgewbzaHNkE0QY4cqLDTlKYbObpwefnVkGqShKd1IWbnScQsBK2UK+e/uAvOQZiewusJZoaM++vTPQbQ4kWN8etYskfwUkJ/7t1RvOBmoidkJnf9bpP4ILBb4x8xMwy+l6wNTcrm7S1bkkzUi3n4z5+vgIBuOVYhZ+0oxUCgbPWakr/Fhz9qg/vrIWeBRvxWpZYXyAGFYy7rH6BAEVR0lPh0LXjV0v2tIwx3efZ+HkeitgHyT7t4Yzd1sYIpg/Vw+NJ5bknxSoNFWELBXKIHXAZk0a6CanNS8BOWCJigxt3J69KUwYTst675dnCF2oVnfqdf5dtgEPA0XRXU1gqfQmkhA1XU+ld0abkcgPki4BIWW/BPdP3JnTYkFVIisT21Ti9iZD7Nk23YBHIzULFtd7ijzoh6vkOun86zOhfQrTvCTdh7KnYbSL2pxr6iv9zt3cFAxcJMPv6Hy/R/NZUQyw/RzvvX3ETKOA3VH0c6wh5kP6P23waRoBPWV9XJ6i0UNdIpbn15Gons0+pVAcKp0sb40ss=",
+    "signer_public_key": "LS0tLS1CRUdJTiBSU0EgUFVCTElDIEtFWS0tLS0tCk1JSUNJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBZzhBTUlJQ0NnS0NBZ0VBdHpHcDRTUEh5Q0k5TUtBWU9TdmsKR0trVlRjbVJVYnFpZ0x0QVZ1Vm9KcDRvOFU3Z1h6Z21RNitNb1RWTy9VN2Y4dENQeHp4MEUrWWlxZWlVOE1wTgpuc2wxS0lHYi9ndUdrK2ExMDhKNzgxK3B6aEt1ekY0RlBRcXYvNmM3WFI3N1l2NUN6YTJkUTRONHlxT3p3TjZKCkNtSjRPNU9hVEowcFIzeTBUd0dHTjlQdmdHVFF0WnFjZnFoL2NKMDNBMVU3VlBuQTlMdDFkQnpydnFIZ3BjSzEKU1Q1TldodW1HR2lBNnFWakQ3QlpHQmJTaXdaSW1mVmRiUVRFRUJsa09BZ1BUcDViak0xUWpMK0FmVjlKd1BVVApsNkYvQVVrNEFKVmlyRjlMZS9FSmpzdzJtcmNDN0swNmtLaXN4ZWp1MURSaElML1RYaXJzNTRnUWI3dGQ5c2xMClkyalhOWEVnU1RPVWs2K04zejk3cVJqMHRBS1RlbWJGb2dPUHlISWVPdktYQ3FuYkJ0VTRpSVNpU2lzeGdnQWYKV1NzWGFGZ210SHVBcEpicVl5RFZLVG9BSmF4Zklvbm8vd21yNUJOT1dBK29jcHRyV0xlTmVWQnpMVzJsMlFRUgpXTjR2NVQ0WnF6bjdLQ2FJdU4vWG9iV3M3NUp1UHd2bFFsUUR6Z1BjUnp6UTRVbFlmKzdiTCtHamdRSFFXL1R3CjlmUlJ6M2dHV3VqeDdvcWYyRk56UysydnhtSmxGZ1dFdVh4ekNqeU1SMWl2cjFlbVQ3akZudVRiYzQrZ0NMSkUKUXhqQUl3b0YrRXlwK2dSOFdQQW1ScmVOcU9kSXlSdEF3TkhYRDJJVTc4NHJxZTBkQktoUFVvcDFYYW1OWitvQgpocWNvanAxWlB5ZS9oTXJkUWpPNzJwMENBd0VBQVE9PQotLS0tLUVORCBSU0EgUFVCTElDIEtFWS0tLS0tCg=="
+  }
+]
 }
 ``` 
 

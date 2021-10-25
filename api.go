@@ -52,7 +52,7 @@ func handleRequests(port int) {
 	router.HandleFunc("/api/nodes/resolve", getConsensus)
 
 	router.HandleFunc("/api/transactions/new", postNewTransaction).Methods("POST")
-	router.HandleFunc("/api/nodes/register", postRegisterNode).Methods("POST")
+	router.HandleFunc("/api/nodes/validatorify", makeNodeValidator).Methods("POST")
 
 	fmt.Printf("Server attemping to listen on %v", addr)
 	err := http.ListenAndServe(addr, handlers.CORS(header, methods, origins)(router))
@@ -65,7 +65,11 @@ func handleRequests(port int) {
    Function to mine
 */
 func mine(w http.ResponseWriter, _ *http.Request) {
-	// TODO: Check if public key is in list of validators
+	if !checkIfValidator(getRsaPublicKeyAsBase64Str(publicKey)) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(Message{Message: "Cannot mine block since you are not a validator"})
+		return
+	}
 
 	lastBlock := chain[len(chain)-1]
 	if lastBlock.SignerPublicKey == getRsaPublicKeyAsBase64Str(publicKey) {
@@ -76,7 +80,7 @@ func mine(w http.ResponseWriter, _ *http.Request) {
 
 	addNewTransaction(Transaction{
 		Sender:    "0",
-		Recipient: nodeIdentifier,
+		Recipient: getRsaPublicKeyAsBase64Str(publicKey),
 		Amount:    1,
 		Timestamp: time.Now(),
 	})
@@ -140,7 +144,7 @@ func getVerifiedTransactions(w http.ResponseWriter, _ *http.Request) {
    Get the list of all the registered nodes in the Blockchain network
 */
 func getNodes(w http.ResponseWriter, _ *http.Request) {
-	json.NewEncoder(w).Encode(nodes)
+	json.NewEncoder(w).Encode(getNodesList(false))
 }
 
 /*
@@ -192,24 +196,33 @@ func postNewTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
-   Function to register a node to the network
-*/
-func postRegisterNode(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
+func makeNodeValidator(w http.ResponseWriter, r *http.Request) {
+	if checkIfValidator(getRsaPublicKeyAsBase64Str(publicKey)) {
+		body, _ := ioutil.ReadAll(r.Body)
 
-	var newNode struct {
-		Url         string `json:"url"`
-		PublicKey   string `json:"public_key"`
-		IsValidator int    `json:"is_validator"`
+		var validator struct {
+			Url       string `json:"url"`
+			PublicKey string `json:"public_key"`
+		}
+		err := json.Unmarshal(body, &validator)
+		if err != nil {
+			panic(err)
+		}
+
+		addToList([]Node{
+			{
+				Url:         validator.Url,
+				PublicKey:   validator.PublicKey,
+				IsValidator: 1,
+			},
+		})
+
+		json.NewEncoder(w).Encode(Message{Message: fmt.Sprintf("Made %v a validator", validator.PublicKey[0:9])})
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(Message{Message: "Non-validators cannot make a node a validator"})
+		return
 	}
-	json.Unmarshal(body, &newNode)
-	registerNode(newNode)
-
-	json.NewEncoder(w).Encode(RegisterNodeResponse{
-		Message:  "Node has been added to the network",
-		AllNodes: nodes,
-	})
 }
 
 func verifyCurrentChain(w http.ResponseWriter, _ *http.Request) {

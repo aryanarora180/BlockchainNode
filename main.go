@@ -8,13 +8,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -38,17 +36,9 @@ type SignedBlock struct {
 	SignerPublicKey string `json:"signer_public_key"`
 }
 
-type Node struct {
-	Url         string `json:"url"`
-	PublicKey   string `json:"public_key"`
-	IsValidator int    `json:"is_validator"`
-}
-
 var currentTransactions []Transaction
 var chain []SignedBlock
-var nodes []Node
 
-var nodeIdentifier = strings.Replace(uuid.New().String(), "-", "", -1)
 var privateKey *rsa.PrivateKey
 var publicKey *rsa.PublicKey
 
@@ -63,6 +53,21 @@ func main() {
 	if err != nil {
 		port = 5000
 	}
+
+	parsedUrl, err := url.Parse("http://localhost:" + strconv.Itoa(port))
+	if err != nil {
+		panic(err)
+	}
+
+	var path string
+	if parsedUrl.Host != "" {
+		path = parsedUrl.Host
+	} else if parsedUrl.Path != "" {
+		path = parsedUrl.Path
+	} else {
+		path = ""
+	}
+	addCurrentNode(path)
 
 	createNewBlock("1", true)
 	handleRequests(port)
@@ -120,6 +125,10 @@ func isValidChain(chain []SignedBlock) bool {
 			return false
 		}
 
+		if !checkIfValidator(block.SignerPublicKey) {
+			return false
+		}
+
 		signature, err := base64.StdEncoding.DecodeString(block.Signature)
 		signerPubKeyString, err := base64.StdEncoding.DecodeString(block.SignerPublicKey)
 		signerPubKey, err := parseRsaPublicKeyFromPemStr(string(signerPubKeyString))
@@ -165,35 +174,6 @@ func convertHashToString(hash []byte) string {
 }
 
 /*
-   Registering a Node:
-       :param address: address of the Node
-*/
-func registerNode(node Node) {
-	parsedUrl, err := url.Parse(node.Url)
-	if err != nil {
-		panic(err)
-	}
-
-	var path string
-	if parsedUrl.Host != "" {
-		path = parsedUrl.Host
-	} else if parsedUrl.Path != "" {
-		path = parsedUrl.Path
-	} else {
-		path = ""
-	}
-
-	// TODO: If validator, only then you can add someone else as a validator else just add them as a Node
-	var isValidator = node.IsValidator
-
-	nodes = append(nodes, Node{
-		Url:         path,
-		PublicKey:   node.PublicKey,
-		IsValidator: isValidator,
-	})
-}
-
-/*
    Resolve conflicts using the longest chain rule.
        :return: true if the chain is being replaced, false if not.
 */
@@ -204,7 +184,7 @@ func resolveConflicts() bool {
 	maxLength := len(chain)
 
 	// check the chains for all the nodes and replace the current chain with the longest chain (if it isn't already the longest)
-	for _, node := range nodes {
+	for _, node := range getNodesList(true) {
 		response, err := http.Get("http://" + node.Url + "/api/chain")
 		if err == nil && response.StatusCode == 200 {
 			responseBody, err := ioutil.ReadAll(response.Body)

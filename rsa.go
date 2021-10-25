@@ -29,7 +29,6 @@ func getRsaKeyPair() (*rsa.PrivateKey, *rsa.PublicKey) {
 		pubWriteErr := writeRsaPublicKeyToFile(&generatedKey.PublicKey)
 
 		if privWriteErr != nil || pubWriteErr != nil {
-			panic(privWriteErr)
 			panic("Unable to write keys to file")
 		}
 
@@ -47,7 +46,6 @@ func createKeysFolder() {
 		if errDir != nil {
 			log.Fatal(err)
 		}
-
 	}
 }
 
