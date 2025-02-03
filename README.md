@@ -1,3 +1,6 @@
+# Blockchain Node
+A GoLang project to create a fully functional, cryptographically secured blockchain with an accompanying API, supporting multiple nodes operating locally on different ports.
+
 # API Documentation
 
 ## Structure and basic protocols followed
